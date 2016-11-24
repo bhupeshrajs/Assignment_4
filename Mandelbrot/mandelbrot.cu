@@ -76,8 +76,8 @@ __global__ void mandelbrotCUDA(
                     int *d_maxIterations,
                     int *d_output_cuda ) {
     
-    int row = blockIdx.y * blockDim.y + threadIdx.y; // WIDTH
-    int col = blockIdx.x * blockDim.x + threadIdx.x; // HEIGHT
+    int row = blockIdx.y * blockDim.y + threadIdx.y; // HEIGHT
+    int col = blockIdx.x * blockDim.x + threadIdx.x; // WIDTH
     
     //printf("\n row and column are : (%d,%d)",row,col) ;
     
@@ -85,6 +85,7 @@ __global__ void mandelbrotCUDA(
     
     if( col >= (*d_width) ) return;
     if( row >= (*d_height) ) return;
+    if( index >= ( (*d_height)*(*d_width) ) return;
     
     float dx = ( (*d_x1) - (*d_x0) ) / (*d_width);
     float dy = ( (*d_y1) - (*d_y0) ) / (*d_height);
@@ -180,7 +181,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     else {
-        printf("\n\"The output from the MPI matches the serial output\"\n\n");
+        printf("\n\"The output from the CUDA matches the serial output\"\n\n");
     }
 
 
