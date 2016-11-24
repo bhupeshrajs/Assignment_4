@@ -1,0 +1,18 @@
+#!/bin/sh
+#SBATCH -J CUDA_MANDELBROT
+#SBATCH -o CUDA_MANDELBROT.%J.stdout
+#SBATCH -e CUDA_MANDELBROT.%J.stderr
+#SBATCH -p gpu
+#SBATCH --reservation gpu001
+#SBATCH --gres=gpu:1
+#SBATCH -N 1
+#SBATCH -t 10:00
+
+sleep 3
+echo ============== START ==============
+hostname
+module load cuda
+nvcc mandelbrot.cu
+./a.out 4
+echo =============== END ===============
+sleep 3
