@@ -122,8 +122,8 @@ int main(int argc, char *argv[])
     
     
     /* Height , width of the image */
-    const int width = 200;
-    const int height = 200;
+    const int width = 10;
+    const int height = 10;
     
     /* Max iterations to do */
     const int maxIterations = 256;
@@ -171,8 +171,15 @@ int main(int argc, char *argv[])
     
     mandelbrotSerial(x0, y0, x1, y1, width, height, 0, height, maxIterations, output_serial);
     
-    
-    
+    cudaFree(d_output_cuda);
+    cudaFree(d_x0);
+    cudaFree(d_x1);
+    cudaFree(d_y0);
+    cudaFree(d_y1);
+    cudaFree(d_width);
+    cudaFree(d_height);
+    cudaFree(d_maxIterations);
+
     if (! verifyResult (output_serial, output_cuda, width, height)) {
         printf ("Error : Output from threads does not match serial output\n");
         return 1;
