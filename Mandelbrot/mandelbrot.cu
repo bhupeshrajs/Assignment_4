@@ -73,7 +73,7 @@ bool verifyResult (int *gold, int *result, int width, int height) {
 __global__ void mandelbrotCUDA(
                     float *d_x0, float *d_y0, float *d_x1, float *d_y1,
                     int *d_width, int *d_height,
-                    int *d_maxIterations
+                    int *d_maxIterations,
                     int *d_output_cuda ) {
     
     int row = blockIdx.y * blockDim.y + threadIdx.y; // WIDTH
@@ -84,17 +84,17 @@ __global__ void mandelbrotCUDA(
     if( col >= (*d_width) ) return;
     if( row >= (*d_height) ) return;
     
-    float dx = (*d_x1 - *d_x0) / d_width;
-    float dy = (*d_y1 - *d_y0) / d_height;
+    float dx = ( (*d_x1) - (*d_x0) ) / (*d_width);
+    float dy = ( (*d_y1) - (*d_y0) ) / (*d_height);
     
-    float c_re = *d_x0 + col * dx;
-    float c_im = *d_y0 + row * dy;
+    float c_re = (*d_x0) + col * dx;
+    float c_im = (*d_y0) + row * dy;
     
     float z_re = c_re;
     float z_im = c_im;
     
     int i;
-    for (i = 0; i < *d_maxIterations; ++i) {
+    for (i = 0; i < (*d_maxIterations); ++i) {
 
         if (z_re * z_re + z_im * z_im > 4.f)
             break;
