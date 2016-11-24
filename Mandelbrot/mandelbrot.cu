@@ -10,11 +10,11 @@ int mandel(double c_re, double c_im, int count)
     int i;
     for (i = 0; i < count; ++i) {
 
-        if (z_re * z_re + z_im * z_im > 4.0)
+        if (z_re * z_re + z_im * z_im > 4.f)
             break;
 
         double new_re = z_re*z_re - z_im*z_im;
-        double new_im = 2.0 * z_re * z_im;
+        double new_im = 2.f * z_re * z_im;
         z_re = c_re + new_re;
         z_im = c_im + new_im;
     }
@@ -104,11 +104,11 @@ __global__ void mandelbrotCUDA(
     int i = 0;
     for ( i = 0 ; i < *d_maxIterations ; ++i ) {
     
-        if( z_re * z_re + z_im * z_im > 4.0 ) 
+        if( z_re * z_re + z_im * z_im > 4.f ) 
             break;
             
         double new_re = z_re*z_re - z_im*z_im;
-        double new_im = 2.0 * z_re * z_im;
+        double new_im = 2.f * z_re * z_im;
         z_re = c_re + new_re;
         z_im = c_im + new_im;
     }
