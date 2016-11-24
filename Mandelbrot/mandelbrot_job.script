@@ -13,6 +13,6 @@ echo ============== START ==============
 hostname
 module load cuda
 nvcc mandelbrot.cu
-./a.out 4
+./a.out 1
 echo =============== END ===============
 sleep 3
