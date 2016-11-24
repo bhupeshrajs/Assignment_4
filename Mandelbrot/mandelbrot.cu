@@ -62,7 +62,7 @@ bool verifyResult (int *gold, int *result, int width, int height) {
             if (gold[i * width + j] != result[i * width + j]) {
                 printf ("Mismatch : [%d][%d], Expected : %d, Actual : %d\n",
                             i, j, gold[i * width + j], result[i * width + j]);
-                return 0;
+                continue;
             }
         }
     }
@@ -83,6 +83,8 @@ __global__ void mandelbrotCUDA(
         printf("\n block dimensions are : (%d,%d)",blockDim.x,blockDim.y) ;
         printf("\n block Ids are : (%d,%d)",blockIdx.x,blockIdx.y) ;
         printf("\n thread Ids are : (%d,%d)",threadIdx.x,threadIdx.y) ;
+        printf("\n x0, x1, y0, y1 : %f, %f, %f, %f",*d_x0,*d_x1,*d_y0,*d_y1);
+        printf("\n height and width : %d, %d",d_height,d_width);
     }
     
     int index = row * (*d_width) + col;
