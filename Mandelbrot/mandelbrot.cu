@@ -79,7 +79,7 @@ __global__ void mandelbrotCUDA(
     int row = blockIdx.y * blockDim.y + threadIdx.y; // WIDTH
     int col = blockIdx.x * blockDim.x + threadIdx.x; // HEIGHT
     
-    printf("\n row and column are : (%d,%d)",row,col) ;
+    //printf("\n row and column are : (%d,%d)",row,col) ;
     
     int index = row * (*d_width) + col;
     
@@ -124,8 +124,8 @@ int main(int argc, char *argv[])
     
     
     /* Height , width of the image */
-    const int width = 12;
-    const int height = 8;
+    const int width = 1200;
+    const int height = 800;
     
     /* Max iterations to do */
     const int maxIterations = 256;
