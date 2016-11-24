@@ -1,6 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
+
+extern void writePPMImage(
+    int* data,
+    int width, int height,
+    const char *filename,
+    int maxIterations);
+
+
 /* 
  *  Used in Serial Implementation of the mandelbrot 
  */
@@ -55,17 +64,19 @@ void mandelbrotSerial(
 bool verifyResult (int *gold, int *result, int width, int height) {
 
     int i, j;
-
+    int mismatch_count = 0;
     for (i = 0; i < height; i++) {
         for (j = 0; j < width; j++) {
             if (gold[i * width + j] != result[i * width + j]) {
-                printf ("Mismatch : [%d][%d], Expected : %d, Actual : %d\n",
-                            i, j, gold[i * width + j], result[i * width + j]);
-                continue;
+                mismatch_count++;
             }
         }
     }
 
+    if( mismatch_count == 0 ) {
+        return 0;
+    }
+    
     return 1;
 }
 
@@ -197,6 +208,8 @@ int main(int argc, char *argv[])
     else {
         printf("\n\"The output from the CUDA matches the serial output\"\n\n");
     }
+    
+    writePPMImage(output_cuda, width, height, "mandelbrot-cuda.ppm", maxIterations);
 
 
     return 0;

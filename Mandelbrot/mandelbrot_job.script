@@ -12,7 +12,7 @@ sleep 3
 echo ============== START ==============
 hostname
 module load cuda
-nvcc mandelbrot.cu -ftz=false -prec-div=true -prec-sqrt=true
+nvcc mandelbrot.cu ppm.cpp
 ./a.out 8
 echo =============== END ===============
 sleep 3
