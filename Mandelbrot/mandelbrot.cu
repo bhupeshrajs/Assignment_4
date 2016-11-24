@@ -1,31 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
-
-#define cudaAssertSuccess(ans) { _cudaAssertSuccess((ans), __FILE__, __LINE__); }
-inline void _cudaAssertSuccess(cudaError_t code, char *file, int line)
-{
-  if (code != cudaSuccess)  {
-    fprintf(stderr,"_cudaAssertSuccess: %s %s %d\n", cudaGetErrorString(code), file, line);
-    exit(code);
-  }
-}
-
 /* 
  *  Used in Serial Implementation of the mandelbrot 
  */
-int mandel(float c_re, float c_im, int count)
+int mandel(double c_re, double c_im, int count)
 {
-    float z_re = c_re, z_im = c_im;
+    double z_re = c_re, z_im = c_im;
     int i;
     for (i = 0; i < count; ++i) {
 
-        if (z_re * z_re + z_im * z_im > 4.f)
+        if (z_re * z_re + z_im * z_im > 4.0)
             break;
 
-        float new_re = z_re*z_re - z_im*z_im;
-        float new_im = 2.f * z_re * z_im;
+        double new_re = z_re*z_re - z_im*z_im;
+        double new_im = 2.0 * z_re * z_im;
         z_re = c_re + new_re;
         z_im = c_im + new_im;
     }
@@ -38,21 +27,21 @@ int mandel(float c_re, float c_im, int count)
  *  Mandelbrot Serial Function 
  */
 void mandelbrotSerial(
-    float x0, float y0, float x1, float y1,
+    double x0, double y0, double x1, double y1,
     int width, int height,
     int startRow, int totalRows,
     int maxIterations,
     int output[])
 {
-    float dx = (x1 - x0) / width;
-    float dy = (y1 - y0) / height;
+    double dx = (x1 - x0) / width;
+    double dy = (y1 - y0) / height;
 
     int endRow = startRow + totalRows;
 
     for (int j = startRow; j < endRow; j++) {
         for (int i = 0; i < width; ++i) {
-            float x = x0 + i * dx;
-            float y = y0 + j * dy;
+            double x = x0 + i * dx;
+            double y = y0 + j * dy;
 
             int index = (j * width + i);
             output[index] = mandel(x, y, maxIterations);
@@ -81,7 +70,7 @@ bool verifyResult (int *gold, int *result, int width, int height) {
 }
 
 __global__ void mandelbrotCUDA(
-                    float *d_x0, float *d_y0, float *d_x1, float *d_y1,
+                    double *d_x0, double *d_y0, double *d_x1, double *d_y1,
                     int *d_width, int *d_height,
                     int *d_maxIterations,
                     int *d_output_cuda ) {
@@ -103,23 +92,23 @@ __global__ void mandelbrotCUDA(
     if( row >= (*d_height) ) return;
     if( index >= ( (*d_height)*(*d_width) ) ) return;
     
-    float dx = ( (*d_x1) - (*d_x0) ) / (*d_width);
-    float dy = ( (*d_y1) - (*d_y0) ) / (*d_height);
+    double dx = ( (*d_x1) - (*d_x0) ) / (*d_width);
+    double dy = ( (*d_y1) - (*d_y0) ) / (*d_height);
     
-    float c_re = (*d_x0) + col * dx;
-    float c_im = (*d_y0) + row * dy;
+    double c_re = (*d_x0) + col * dx;
+    double c_im = (*d_y0) + row * dy;
     
-    float z_re = c_re;
-    float z_im = c_im;
+    double z_re = c_re;
+    double z_im = c_im;
     
     int i = 0;
     for ( i = 0 ; i < *d_maxIterations ; ++i ) {
     
-        if( z_re * z_re + z_im * z_im > 4.f ) 
+        if( z_re * z_re + z_im * z_im > 4.0 ) 
             break;
             
-        float new_re = z_re*z_re - z_im*z_im;
-        float new_im = 2.f * z_re * z_im;
+        double new_re = z_re*z_re - z_im*z_im;
+        double new_im = 2.0 * z_re * z_im;
         z_re = c_re + new_re;
         z_im = c_im + new_im;
     }
@@ -148,37 +137,37 @@ int main(int argc, char *argv[])
     const int maxIterations = 256;
     
     /* The value of x0,x1,y0,y1 */
-    float x0 = -2;
-    float x1 = 1;
-    float y0 = -1;
-    float y1 = 1;
+    double x0 = -2;
+    double x1 = 1;
+    double y0 = -1;
+    double y1 = 1;
 
 
     int* output_serial = (int*)malloc(width*height*sizeof(int));
     int* output_cuda = (int*)malloc(width*height*sizeof(int));
     
     int *d_output_cuda;
-    float *d_x0;
-    float *d_y0;
-    float *d_x1;
-    float *d_y1;
+    double *d_x0;
+    double *d_y0;
+    double *d_x1;
+    double *d_y1;
     int *d_width, *d_height;
     int *d_maxIterations;
     
-    cudaAssertSucess(cudaMalloc((void **)&d_output_cuda, sizeof(int)*width*height));
-    cudaMalloc((void **)&d_x0, sizeof(float));
-    cudaMalloc((void **)&d_x1, sizeof(float));
-    cudaMalloc((void **)&d_y0, sizeof(float));
-    cudaMalloc((void **)&d_y1, sizeof(float));
+    cudaMalloc((void **)&d_output_cuda, sizeof(int)*width*height);
+    cudaMalloc((void **)&d_x0, sizeof(double));
+    cudaMalloc((void **)&d_x1, sizeof(double));
+    cudaMalloc((void **)&d_y0, sizeof(double));
+    cudaMalloc((void **)&d_y1, sizeof(double));
     cudaMalloc((void **)&d_width, sizeof(int));
     cudaMalloc((void **)&d_height, sizeof(int));
     cudaMalloc((void **)&d_maxIterations, sizeof(int));
     
     cudaMemcpy(d_output_cuda, output_cuda, sizeof(int)*width*height, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_x0, &x0, sizeof(float) , cudaMemcpyHostToDevice);
-    cudaMemcpy(d_x1, &x1, sizeof(float) , cudaMemcpyHostToDevice);
-    cudaMemcpy(d_y0, &y0, sizeof(float) , cudaMemcpyHostToDevice);
-    cudaMemcpy(d_y1, &y1, sizeof(float) , cudaMemcpyHostToDevice);
+    cudaMemcpy(d_x0, &x0, sizeof(double) , cudaMemcpyHostToDevice);
+    cudaMemcpy(d_x1, &x1, sizeof(double) , cudaMemcpyHostToDevice);
+    cudaMemcpy(d_y0, &y0, sizeof(double) , cudaMemcpyHostToDevice);
+    cudaMemcpy(d_y1, &y1, sizeof(double) , cudaMemcpyHostToDevice);
     cudaMemcpy(d_width, &width, sizeof(int) , cudaMemcpyHostToDevice);
     cudaMemcpy(d_height, &height, sizeof(int) , cudaMemcpyHostToDevice);
     cudaMemcpy(d_maxIterations, &maxIterations, sizeof(int) , cudaMemcpyHostToDevice);
@@ -188,8 +177,6 @@ int main(int argc, char *argv[])
     
     mandelbrotCUDA<<<grid_size,block_size>>>(d_x0,d_y0,d_x1,d_y1,d_width,d_height,d_maxIterations,d_output_cuda);
     
-    cudaAssertSuccess(cudaPeekAtLastError());
-    cudaAssertSuccess(cudaDeviceSynchronize());
     cudaMemcpy(output_cuda, d_output_cuda, sizeof(int)*width*height, cudaMemcpyDeviceToHost);
     
     mandelbrotSerial(x0, y0, x1, y1, width, height, 0, height, maxIterations, output_serial);
