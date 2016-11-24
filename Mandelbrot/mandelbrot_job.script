@@ -12,7 +12,6 @@ sleep 3
 echo ============== START ==============
 hostname
 module load cuda
-nvcc mandelbrot.cu -warn-double-usage
-./a.out 8
+nvcc mandelbrot.cu -ftz=false -prec-div=true -prec-sqrt=true
 echo =============== END ===============
 sleep 3
