@@ -2,6 +2,16 @@
 #include <stdlib.h>
 #include <math.h>
 
+
+#define cudaAssertSuccess(ans) { _cudaAssertSuccess((ans), __FILE__, __LINE__); }
+inline void _cudaAssertSuccess(cudaError_t code, char *file, int line)
+{
+  if (code != cudaSuccess)  {
+    fprintf(stderr,"_cudaAssertSuccess: %s %s %d\n", cudaGetErrorString(code), file, line);
+    exit(code);
+  }
+}
+
 /* 
  *  Used in Serial Implementation of the mandelbrot 
  */
@@ -87,7 +97,7 @@ __global__ void mandelbrotCUDA(
         printf("\n height and width : %d, %d",*d_height,*d_width);
     }
     
-    int index = row * (*d_width) + col;
+    int index = (row * (*d_width)) + col;
     
     if( col >= (*d_width) ) return;
     if( row >= (*d_height) ) return;
@@ -102,8 +112,8 @@ __global__ void mandelbrotCUDA(
     float z_re = c_re;
     float z_im = c_im;
     
-    int i;
-    for ( i = 0 ; i < *d_maxIterations ; i++ ) {
+    int i = 0;
+    for ( i = 0 ; i < *d_maxIterations ; ++i ) {
     
         if( z_re * z_re + z_im * z_im > 4.f ) 
             break;
@@ -155,7 +165,7 @@ int main(int argc, char *argv[])
     int *d_width, *d_height;
     int *d_maxIterations;
     
-    cudaMalloc((void **)&d_output_cuda, sizeof(int)*width*height);
+    cudaAssertSucess(cudaMalloc((void **)&d_output_cuda, sizeof(int)*width*height));
     cudaMalloc((void **)&d_x0, sizeof(float));
     cudaMalloc((void **)&d_x1, sizeof(float));
     cudaMalloc((void **)&d_y0, sizeof(float));
@@ -178,6 +188,8 @@ int main(int argc, char *argv[])
     
     mandelbrotCUDA<<<grid_size,block_size>>>(d_x0,d_y0,d_x1,d_y1,d_width,d_height,d_maxIterations,d_output_cuda);
     
+    cudaAssertSuccess(cudaPeekAtLastError());
+    cudaAssertSuccess(cudaDeviceSynchronize());
     cudaMemcpy(output_cuda, d_output_cuda, sizeof(int)*width*height, cudaMemcpyDeviceToHost);
     
     mandelbrotSerial(x0, y0, x1, y1, width, height, 0, height, maxIterations, output_serial);
