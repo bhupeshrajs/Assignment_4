@@ -96,19 +96,16 @@ __global__ void mandelbrotCUDA(
     float z_re = c_re;
     float z_im = c_im;
     
-    int i;
-    for (i = 0; i < (*d_maxIterations); ++i) {
-
-        if (z_re * z_re + z_im * z_im > 4.f)
-            break;
-
+    int iter = 0;
+    while (z_re * z_re + z_im * z_im <= 4.f && (iter < d_maxIterations) ) {
         float new_re = z_re*z_re - z_im*z_im;
         float new_im = 2.f * z_re * z_im;
         z_re = c_re + new_re;
         z_im = c_im + new_im;
+        iter++;
     }
 
-    d_output_cuda[index] = i;
+    d_output_cuda[index] = iter;
     
 }
 
