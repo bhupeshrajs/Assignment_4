@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
     
     
     /* Height , width of the image */
-    const int width = 1200;
+    const int width = 800;
     const int height = 800;
     
     /* Max iterations to do */
