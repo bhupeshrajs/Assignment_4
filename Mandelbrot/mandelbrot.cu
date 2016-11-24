@@ -85,7 +85,7 @@ __global__ void mandelbrotCUDA(
     
     if( col >= (*d_width) ) return;
     if( row >= (*d_height) ) return;
-    if( index >= ( (*d_height)*(*d_width) ) return;
+    if( index >= ( (*d_height)*(*d_width) ) ) return;
     
     float dx = ( (*d_x1) - (*d_x0) ) / (*d_width);
     float dy = ( (*d_y1) - (*d_y0) ) / (*d_height);
