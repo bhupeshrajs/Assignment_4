@@ -79,7 +79,7 @@ __global__ void mandelbrotCUDA(
     int row = blockIdx.y * blockDim.y + threadIdx.y; // WIDTH
     int col = blockIdx.x * blockDim.x + threadIdx.x; // HEIGHT
     
-    printf("\n row and column are : (%d,%d)",row,column) ;
+    printf("\n row and column are : (%d,%d)",row,col) ;
     
     int index = row * (*d_width) + col;
     
