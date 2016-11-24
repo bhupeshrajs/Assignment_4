@@ -5,7 +5,7 @@
 /* 
  *  Used in Serial Implementation of the mandelbrot 
  */
-static inline int mandel(float c_re, float c_im, int count)
+int mandel(float c_re, float c_im, int count)
 {
     float z_re = c_re, z_im = c_im;
     int i;
@@ -84,7 +84,7 @@ __global__ void mandelbrotCUDA(
         printf("\n block Ids are : (%d,%d)",blockIdx.x,blockIdx.y) ;
         printf("\n thread Ids are : (%d,%d)",threadIdx.x,threadIdx.y) ;
         printf("\n x0, x1, y0, y1 : %f, %f, %f, %f",*d_x0,*d_x1,*d_y0,*d_y1);
-        printf("\n height and width : %d, %d",d_height,d_width);
+        printf("\n height and width : %d, %d",*d_height,*d_width);
     }
     
     int index = row * (*d_width) + col;
@@ -102,16 +102,19 @@ __global__ void mandelbrotCUDA(
     float z_re = c_re;
     float z_im = c_im;
     
-    int iter = 0;
-    while (z_re * z_re + z_im * z_im <= 4.f && (iter < (*d_maxIterations) ) ) {
+    int i;
+    for ( i = 0 ; i < *d_maxIterations ; i++ ) {
+    
+        if( z_re * z_re + z_im * z_im > 4.f ) 
+            break;
+            
         float new_re = z_re*z_re - z_im*z_im;
         float new_im = 2.f * z_re * z_im;
         z_re = c_re + new_re;
         z_im = c_im + new_im;
-        iter++;
     }
 
-    d_output_cuda[index] = iter;
+    d_output_cuda[index] = i;
     
 }
 
