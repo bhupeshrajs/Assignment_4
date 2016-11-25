@@ -14,5 +14,7 @@ hostname
 module load cuda
 nvcc mandelbrot.cu ppm.cpp
 ./a.out 8
+./a.out 16
+./a.out 32
 echo =============== END ===============
 sleep 3

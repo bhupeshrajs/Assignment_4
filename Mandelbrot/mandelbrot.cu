@@ -173,8 +173,13 @@ int main(int argc, char *argv[])
     
     double cuda_start_time,cuda_end_time,cuda_time;
     double serial_start_time,serial_end_time,serial_time;
+    double data_communication_time = 0;
+    double d_start, d_end;
+    double c_start, c_end, c_time;
+    
     
     cuda_start_time = usecs();
+    d_start = usecs();
     
     cudaMalloc((void **)&d_output_cuda, sizeof(int)*width*height);
     cudaMalloc((void **)&d_x0, sizeof(double));
@@ -194,10 +199,20 @@ int main(int argc, char *argv[])
     cudaMemcpy(d_height, &height, sizeof(int) , cudaMemcpyHostToDevice);
     cudaMemcpy(d_maxIterations, &maxIterations, sizeof(int) , cudaMemcpyHostToDevice);
     
+    d_end = usecs();
+    
+    data_communication_time = d_end - d_start; 
+    
     dim3 block_size(thread_dimension, thread_dimension);
     dim3 grid_size( ceil(width / block_size.x), ceil(height / block_size.y));
     
+    c_start = usecs();
     mandelbrotCUDA<<<grid_size,block_size>>>(d_x0,d_y0,d_x1,d_y1,d_width,d_height,d_maxIterations,d_output_cuda);
+    c_end = usecs();
+    
+    c_time = ((double)(c_end-c_start))/1000000;
+    
+    d_start = usecs();
     
     cudaMemcpy(output_cuda, d_output_cuda, sizeof(int)*width*height, cudaMemcpyDeviceToHost);
     
@@ -209,6 +224,11 @@ int main(int argc, char *argv[])
     cudaFree(d_width);
     cudaFree(d_height);
     cudaFree(d_maxIterations);
+
+    d_end = usecs();
+    
+    data_communication_time += (d_end - d_start);
+    data_communication_time = (data_communication_time)/1000000;
 
     cuda_end_time = usecs();
     
@@ -222,8 +242,7 @@ int main(int argc, char *argv[])
     serial_time = ((double)(serial_end_time-serial_start_time))/1000000;
 
     if (! verifyResult (output_serial, output_cuda, width, height)) {
-        printf ("Error : Output from threads does not match serial output\n");
-        return 1;
+        printf ("\n Error : Output from threads does not match serial output\n");
     }
     else {
         printf("\n\"The output from the CUDA matches the serial output\"\n\n");
@@ -231,6 +250,10 @@ int main(int argc, char *argv[])
     
     writePPMImage(output_cuda, width, height, "mandelbrot-cuda.ppm", maxIterations);
 
+    printf("\n Serial Computation time = %fs\n", serial_time);
+    printf("\n CUDA Total time = %fs\n", cuda_time);
+    printf("\n Data Transfer time = %fs\n", data_communication_time);
+    printf("\n Computation time = %fs\n", c_time);
     
     printf("\n Speedup Achieved is : %fx \n\n",(serial_time/cuda_time));
 
