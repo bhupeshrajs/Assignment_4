@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
+#include <sys/time.h>
 
 extern void writePPMImage(
     int* data,
@@ -9,6 +9,17 @@ extern void writePPMImage(
     const char *filename,
     int maxIterations);
 
+
+/*
+ * Used to measure computation times.
+ */
+long usecs (void)
+{
+    struct timeval t;
+
+    gettimeofday(&t,NULL);
+    return t.tv_sec*1000000+t.tv_usec;
+}
 
 /* 
  *  Used in Serial Implementation of the mandelbrot 
@@ -74,10 +85,10 @@ bool verifyResult (int *gold, int *result, int width, int height) {
     }
 
     if( mismatch_count == 0 ) {
-        return 0;
+        return 1;
     }
     printf("\n The number of mismatches are : %d",mismatch_count);
-    return 1;
+    return 0;
 }
 
 __global__ void mandelbrotCUDA(
@@ -149,6 +160,8 @@ int main(int argc, char *argv[])
     int* output_serial = (int*)malloc(width*height*sizeof(int));
     int* output_cuda = (int*)malloc(width*height*sizeof(int));
     
+    
+    
     int *d_output_cuda;
     double *d_x0;
     double *d_y0;
@@ -156,6 +169,12 @@ int main(int argc, char *argv[])
     double *d_y1;
     int *d_width, *d_height;
     int *d_maxIterations;
+    
+    
+    double cuda_start_time,cuda_end_time,cuda_time;
+    double serial_start_time,serial_end_time,serial_time;
+    
+    cuda_start_time = usecs();
     
     cudaMalloc((void **)&d_output_cuda, sizeof(int)*width*height);
     cudaMalloc((void **)&d_x0, sizeof(double));
@@ -182,8 +201,6 @@ int main(int argc, char *argv[])
     
     cudaMemcpy(output_cuda, d_output_cuda, sizeof(int)*width*height, cudaMemcpyDeviceToHost);
     
-    mandelbrotSerial(x0, y0, x1, y1, width, height, 0, height, maxIterations, output_serial);
-    
     cudaFree(d_output_cuda);
     cudaFree(d_x0);
     cudaFree(d_x1);
@@ -192,6 +209,17 @@ int main(int argc, char *argv[])
     cudaFree(d_width);
     cudaFree(d_height);
     cudaFree(d_maxIterations);
+
+    cuda_end_time = usecs();
+    
+    cuda_time = ((double)(cuda_end_time-cuda_start_time))/1000000;
+
+
+    serial_start_time = usecs();
+    mandelbrotSerial(x0, y0, x1, y1, width, height, 0, height, maxIterations, output_serial);
+    serial_end_time = usecs();
+    
+    serial_time = ((double)(serial_end_time-serial_start_time))/1000000;
 
     if (! verifyResult (output_serial, output_cuda, width, height)) {
         printf ("Error : Output from threads does not match serial output\n");
@@ -202,6 +230,9 @@ int main(int argc, char *argv[])
     }
     
     writePPMImage(output_cuda, width, height, "mandelbrot-cuda.ppm", maxIterations);
+
+    
+    printf("\n Speedup Achieved is : %fx \n\n",(serial_time/cuda_time));
 
 
     return 0;
