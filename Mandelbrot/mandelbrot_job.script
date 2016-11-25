@@ -13,8 +13,21 @@ echo ============== START ==============
 hostname
 module load cuda
 nvcc mandelbrot.cu ppm.cpp
-./a.out 8
-./a.out 16
-./a.out 32
+./a.out 4 1
+./a.out 4 2
+./a.out 4 3
+./a.out 4 4
+./a.out 8 1
+./a.out 8 2
+./a.out 8 3
+./a.out 8 4
+./a.out 16 1
+./a.out 16 2
+./a.out 16 3
+./a.out 16 4
+./a.out 32 1
+./a.out 32 2
+./a.out 32 3
+./a.out 32 4
 echo =============== END ===============
 sleep 3

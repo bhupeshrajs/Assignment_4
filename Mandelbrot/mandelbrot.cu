@@ -141,11 +141,11 @@ int main(int argc, char *argv[])
     }
     
     int thread_dimension = atoi(argv[1]);
-    
+    int size_factor = atoi(argv[2]);
     
     /* Height , width of the image */
-    const int width = 1200;
-    const int height = 800;
+    const int width = 1200*size_factor;
+    const int height = 800*size_factor;
     
     /* Max iterations to do */
     const int maxIterations = 256;
